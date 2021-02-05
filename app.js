@@ -1,24 +1,21 @@
-const _ = require('lodash');
+// TODO change csv programatically where duplicate headers are present
 const csv = require('csv-parser')
 const fs = require('fs');
-const { strict } = require('assert');
 
 const results = []
 
+
+const filteredByKey = (str, data) => Object.fromEntries(Object.entries(data).filter(([key, value]) => key.startsWith(str)))
+
 fs.createReadStream('jira-prod-250days.csv')
   .pipe(csv())
-  // .on('headers', (headers) => )
   .on('data', (data) => 
     {
-
-      const filteredByKey = (str) => Object.fromEntries(Object.entries(data).filter(([key, value]) => key.startsWith(str)))
-
-
       const pri = +data.Priority[0]
       const points =  +data['Custom field (Story Points)']
       const sprintCount = () => {
         let count = 0;
-        const filteredSprint = filteredByKey("Sprint")
+        const filteredSprint = filteredByKey("Sprint", data)
 
         for (const [key, value] of Object.entries(filteredSprint)) {
           if (value) {
@@ -29,7 +26,7 @@ fs.createReadStream('jira-prod-250days.csv')
       }
 
       const findStageDate = () => {
-        const filteredComments = filteredByKey("Comment")
+        const filteredComments = filteredByKey("Comment", data)
         for (const [key, value] of Object.entries(filteredComments)) {
           if (value.includes("staged")) {
             return new Date(value.slice(0,10))
@@ -37,15 +34,6 @@ fs.createReadStream('jira-prod-250days.csv')
           }
         }
       }
-      // const findCompleteDate = () => {
-      //   const filteredComments = filteredByKey("Comment")
-      //   for (const [key, value] of Object.entries(filteredComments)) {
-      //     if (value.includes("publish")) {
-      //       return new Date(value.slice(0,10))
-            
-      //     }
-      //   }
-      // }
       
       const obj = {
         Title: data.Summary,
@@ -63,7 +51,6 @@ fs.createReadStream('jira-prod-250days.csv')
 
       if (obj.StagedDate) {
         results.push(
-          // data
           obj
         )
       }
@@ -71,14 +58,12 @@ fs.createReadStream('jira-prod-250days.csv')
       
   })
   .on('end', () => {
-    // console.log(results);
     let totalHighPoints = 0
     let highCount = 0
     let totalLowPoints = 0
     let lowCount = 0
     let removeOutliers = 0
     let totalOut = 0
-    const stagedToCloseArr = []
     
     // sort array
     results.sort(function(a, b) {
@@ -87,8 +72,7 @@ fs.createReadStream('jira-prod-250days.csv')
 
 
     results.forEach((obj, idx) => {
-
-      stagedToCloseArr.push(+obj.StagedToClose)
+   
 
       if (obj.Points >=4) {
         totalHighPoints += obj.StagedToClose
