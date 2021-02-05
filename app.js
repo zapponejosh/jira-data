@@ -73,7 +73,6 @@ fs.createReadStream('jira-prod-250days.csv')
 
     results.forEach((obj, idx) => {
    
-
       if (obj.Points >=4) {
         totalHighPoints += obj.StagedToClose
         highCount += 1
@@ -103,12 +102,5 @@ fs.createReadStream('jira-prod-250days.csv')
       if (err) throw err;
       console.log('The file has been saved!');
     });
-
-
-    // console.log(results.slice(-20))
-    // console.log("Max staging legnth = " + results[results.length -1].StagedToClose)
-    // console.log("Overall average: " + (((totalHighPoints+totalLowPoints)/results.length).toFixed(3)) + " days out of " + results.length + " tickets")
-    // console.log("High pointed tickets (4 or more): " + (totalHighPoints/highCount).toFixed(3) + " out of " + highCount + " tickets")
-    // console.log("Low pointed tickets (less than 4): " + (totalLowPoints/lowCount).toFixed(3) + " out of " + lowCount + " tickets")
 
   });
